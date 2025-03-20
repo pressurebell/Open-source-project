@@ -92,7 +92,7 @@ export default function ProductivityTracker() {
               <Button
                 variant="contained"
                 sx={{
-                  bgcolor: "white",
+                  bgcolor: "green",
                   color: "black",
                   fontWeight: "bold",
                   borderRadius: "50px",
