@@ -38,7 +38,7 @@ export default function ProductivityTracker() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        marginTop:'20px',
+        marginTop:'30px',
       }}
     >
       <Card
