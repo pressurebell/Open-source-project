@@ -1,116 +1,79 @@
-import { useState, useEffect } from "react";
-import { Card, Typography, Button, LinearProgress, Container } from "@mui/material";
-import { AddCircle, CheckCircle } from "@mui/icons-material";
+import React, { useState, useEffect } from "react";
+import { Button, Card, CardContent, Typography, LinearProgress, Box } from "@mui/material";
+import { motion } from "framer-motion";
+import { CheckCircle, Trophy } from "lucide-react";
+
+const tasks = [
+  { id: 1, name: "Complete project proposal", points: 50 },
+  { id: 2, name: "Daily stand-up meeting", points: 20 },
+  { id: 3, name: "Fix UI bug on dashboard", points: 30 },
+  { id: 4, name: "Review pull request", points: 40 },
+  { id: 5, name: "Write documentation", points: 25 },
+];
 
 export default function ProductivityTracker() {
-  const [tasks, setTasks] = useState([]);
-
-  // Populate tasks to ensure they exist
-  useEffect(() => {
-    setTasks([
-      { id: 1, text: "Complete an open-source contribution", completed: false },
-      { id: 2, text: "Read 10 pages of a book", completed: false },
-      { id: 3, text: "Exercise for 30 minutes", completed: false },
-    ]);
-  }, []);
-
+  const [completedTasks, setCompletedTasks] = useState([]);
   const [progress, setProgress] = useState(0);
+  const [level, setLevel] = useState(1);
 
-  const completeTask = (id) => {
-    const updatedTasks = tasks.map((task) =>
-      task.id === id ? { ...task, completed: true } : task
-    );
-    setTasks(updatedTasks);
-    updateProgress(updatedTasks);
-  };
+  useEffect(() => {
+    const totalPoints = completedTasks.reduce((acc, task) => acc + task.points, 0);
+    setProgress(totalPoints % 100);
+    setLevel(Math.floor(totalPoints / 100) + 1);
+  }, [completedTasks]);
 
-  const updateProgress = (updatedTasks) => {
-    const completedTasks = updatedTasks.filter((task) => task.completed).length;
-    const totalTasks = updatedTasks.length;
-    setProgress((completedTasks / totalTasks) * 100);
+  const completeTask = (task) => {
+    if (!completedTasks.includes(task)) {
+      setCompletedTasks([...completedTasks, task]);
+    }
   };
 
   return (
-    <Container
-      maxWidth="sm"
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop:'30px',
-      }}
-    >
-      <Card
-        sx={{
-          width: "100%",
-          p: 3,
-          bgcolor: "#1E1E1E",
-          color: "white",
-          borderRadius: 5,
-          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.6)",
-        }}
-      >
-        <Typography variant="h4" align="center" fontWeight="bold" sx={{ mb: 2 }}>
-          Gamified Productivity Tracker
-        </Typography>
+    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", p: 4, minHeight: "100vh", bgcolor: "#f5f5f5" }}>
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
+        🚀 Productivity Gamification Tracker
+      </Typography>
 
-        <LinearProgress
-          variant="determinate"
-          value={progress}
-          sx={{
-            height: 8,
-            borderRadius: 5,
-            bgcolor: "#2D2D2D",
-            mb: 3,
-            "& .MuiLinearProgress-bar": { backgroundColor: "#008f39" },
-          }}
-        />
-
-        {tasks.length === 0 ? (
-          <Typography variant="body1" sx={{ color: "white", textAlign: "center", mt: 3 }}>
-            No tasks found.
-          </Typography>
-        ) : (
-          tasks.map((task) => (
-            <Card
-              key={task.id}
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                p: 2,
-                mb: 2,
-                borderRadius: 5,
-                bgcolor: "white",
-                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-              }}
-            >
-              <Typography variant="body1" sx={{ color: "black", fontWeight: "bold" }}>
-                {task.text}
-              </Typography>
-              <Button
-                variant="contained"
-                sx={{
-                  bgcolor: "green",
-                  color: "black",
-                  fontWeight: "bold",
-                  borderRadius: "50px",
-                  px: 3,
-                  py: 1,
-                  boxShadow: "none",
-                  "&:hover": { bgcolor: "#f0f0f0" },
-                }}
-                onClick={() => completeTask(task.id)}
-                disabled={task.completed}
-                startIcon={task.completed ? <CheckCircle sx={{ color: "black" }} /> : <AddCircle sx={{ color: "black" }} />}
-              >
-                {task.completed ? "Completed" : "Complete"}
-              </Button>
-            </Card>
-          ))
-        )}
+      {/* Level Card */}
+      <Card sx={{ width: 360, mb: 4, p: 2 }}>
+        <CardContent sx={{ textAlign: "center" }}>
+          <Typography variant="h5">Level {level}</Typography>
+          <Box sx={{ my: 2 }}>
+            <LinearProgress variant="determinate" value={progress} sx={{ height: 8, borderRadius: 4 }} />
+          </Box>
+          <Typography>{100 - progress} points to next level</Typography>
+        </CardContent>
       </Card>
-    </Container>
+
+      {/* Task List */}
+      <Box sx={{ display: "grid", gap: 2, width: 360 }}>
+        {tasks.map((task) => (
+          <Card key={task.id} sx={{ p: 2, display: "flex", justifyContent: "space-around", alignItems: "center" }}>
+            <Typography>{task.name}</Typography>
+            <Button
+              variant="contained"
+              color={completedTasks.includes(task) ? "success" : "primary"}
+              onClick={() => completeTask(task)}
+              disabled={completedTasks.includes(task)}
+              startIcon={completedTasks.includes(task) ? <CheckCircle size={20} /> : null}
+            >
+              {completedTasks.includes(task) ? "Completed" : "Complete"}
+            </Button>
+          </Card>
+        ))}
+      </Box>
+
+      {/* Level Up Animation */}
+      {progress === 0 && completedTasks.length > 0 && (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.5 }}
+          style={{ textAlign: "center", marginTop: "24px", fontSize: "24px", color: "#ffcc00" }}
+        >
+          <Trophy size={32} /> Level Up!
+        </motion.div>
+      )}
+    </Box>
   );
 }
