@@ -37,6 +37,6 @@ export default function Homescreen() {
     Get Started!
   </Button>
 </Box>
-
+  
   );
 }
