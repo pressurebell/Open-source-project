@@ -18,18 +18,18 @@ export default function Homescreen() {
     backgroundImage: `url("/pictures/earth.jpg")`,
     backgroundSize: "cover",
     backgroundPosition: "center",
-    fontFamily: "Raleway, sans-serif",
+    fontFamily: '"Orbitron", sans-serif',
   }}
 >
-  <Typography variant="h4" gutterBottom sx={{ fontFamily: "Raleway, sans-serif", fontSize: "3rem" ,color:'white',marginBottom:'20px' }}>
-    Welcome to Game Productivity Tracker
+  <Typography variant="h4" gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontSize: "90px" ,color:'white',marginBottom:'20px' }}>
+   Game Productivity Tracker
   </Typography>
-  <Typography variant="h6" gutterBottom sx={{ fontFamily: "Raleway, sans-serif", fontSize: "1.5rem",color:'white' }}>
+  <Typography variant="h6" gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontSize: "20px",color:'white' }}>
     Track your gaming sessions and improve your productivity.
   </Typography>
   <Button
     variant="outlined"
-    color="primary"
+    color="success"
     sx={{ marginTop: "10px", padding: "20px", borderRadius: "10px" }}
     endIcon={<ArrowForwardIcon />}
     onClick={() => navigate("/game")}

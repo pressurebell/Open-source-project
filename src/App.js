@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-// import './App.css';
-import TetrisGame from './Gameproject';
+import './App.css';
 import Homescreen from './Homescreen';
+import FlappyBird from "./Gameproject";
 
-// Alternative Splash Screen Component
+
 const SplashScreen = ({ isLoading }) => {
   return (
     <div className={`splash-screen ${isLoading ? 'active' : ''}`}>
       <div className="splash-content">
-        <div className="game-title">TETRIS</div>
+        <div className="game-title">Flappy Bird</div>
         <div className="loading-bar-container">
           <div className="loading-bar"></div>
         </div>
@@ -107,7 +107,7 @@ const GameLoader = () => {
   return (
     <>
       <SplashScreen isLoading={isLoading} />
-      {!isLoading && <TetrisGame />}
+      {!isLoading && <FlappyBird/>}
     </>
   );
 };
