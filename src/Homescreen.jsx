@@ -25,7 +25,7 @@ export default function Homescreen() {
    Game Productivity Tracker
   </Typography>
   <Typography variant="h6" gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontSize: "20px",color:'white' }}>
-  "Level Up Your Productivity: Track Your Gaming Sessions Like a Pro!"
+  "Boost Your Productivity: Master Gaming Session Tracking Like a Pro!"
   </Typography>
   <Button
     variant="outlined"
