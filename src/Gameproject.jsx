@@ -237,7 +237,9 @@ const FlappyBirdGame = () => {
       fontFamily: 'Arial, sans-serif',
       gap: '20px',
       padding: '20px',
-      backgroungImage: 'url("/Pictures/download.jpg")',
+      backgroundImage: `url("/pictures/images.jpg")`,
+      backgroundSize: "cover",
+    backgroundPosition: "center",
       minHeight: '100vh',
     }}>
       <div style={{
