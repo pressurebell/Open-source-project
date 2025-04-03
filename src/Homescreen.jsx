@@ -15,7 +15,7 @@ export default function Homescreen() {
     justifyContent: "center",
     height: "100vh",
     backgroundColor: "#FFDAB9",
-    backgroundImage: `url("/pictures/wallpaper.jpg")`,
+    backgroundImage: `url("/pictures/earth.jpg")`,
     backgroundSize: "cover",
     backgroundPosition: "center",
     fontFamily: '"Orbitron", sans-serif',
