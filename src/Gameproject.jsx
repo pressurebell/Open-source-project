@@ -181,11 +181,12 @@ const FlappyBirdGame = () => {
     if (!gameStarted || gameOver) {
       startGame();
     } else {
+      // Just make the bird jump if the game is already running
       setBirdVelocity(JUMP_FORCE);
     }
   };
   
-  // Set up key listener without dependencies to prevent re-binding
+  // Set up key listener for space bar
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.code === 'Space' || e.key === ' ') {
@@ -204,7 +205,7 @@ const FlappyBirdGame = () => {
       if (timeCounterRef.current) clearInterval(timeCounterRef.current);
       gameRunningRef.current = false;
     };
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, []); // Empty dependency array to only add the listener once
   
   return (
     <div style={{ 
@@ -229,12 +230,6 @@ const FlappyBirdGame = () => {
         <div
           ref={gameContainerRef}
           onClick={handleJump}
-          onKeyDown={(e) => {
-            if (e.code === 'Space' || e.key === ' ') {
-              e.preventDefault();
-              handleJump();
-            }
-          }}
           tabIndex="0" // Make the div focusable for keyboard events
           style={{
             position: 'relative',
@@ -249,23 +244,43 @@ const FlappyBirdGame = () => {
             outline: 'none' // Remove focus outline
           }}
         >
-          {/* Bird */}
-          <div
-            style={{
+          {/* Bird - Updated to look more like a bird */}
+          <div style={{
+            position: 'absolute',
+            left: '100px',
+            top: `${birdPosition}px`,
+            width: `${BIRD_WIDTH}px`,
+            height: `${BIRD_HEIGHT}px`,
+            backgroundColor: '#FFFF00',
+            borderRadius: '50% 50% 50% 20%',
+            border: '2px solid black',
+            transform: `rotate(${birdVelocity * 3}deg)`,
+            transition: 'transform 0.1s',
+            zIndex: 10,
+            boxShadow: '1px 1px 3px rgba(0,0,0,0.3)',
+            overflow: 'hidden'
+          }}>
+            {/* Eye */}
+            <div style={{
               position: 'absolute',
-              left: '100px',
-              top: `${birdPosition}px`,
-              width: `${BIRD_WIDTH}px`,
-              height: `${BIRD_HEIGHT}px`,
-              backgroundColor: '#FFFF00',
-              borderRadius: '50%',
-              border: '2px solid black',
-              transform: `rotate(${birdVelocity * 3}deg)`,
-              transition: 'transform 0.1s',
-              zIndex: 10,
-              boxShadow: '1px 1px 3px rgba(0,0,0,0.3)'
-            }}
-          />
+              top: '5px',
+              right: '5px',
+              width: '8px',
+              height: '8px',
+              backgroundColor: 'black',
+              borderRadius: '50%'
+            }}/>
+            {/* Beak */}
+            <div style={{
+              position: 'absolute',
+              top: '12px',
+              right: '-6px',
+              width: '12px',
+              height: '6px',
+              backgroundColor: 'orange',
+              borderRadius: '0 50% 50% 0'
+            }}/>
+          </div>
 
           {/* Ground */}
           <div
@@ -361,7 +376,7 @@ const FlappyBirdGame = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                alignItems: 'center',
+                alignItems: 'felx-start',
                 backgroundColor: 'rgba(0,0,0,0.5)',
                 color: 'white',
                 zIndex: 20
@@ -414,33 +429,7 @@ const FlappyBirdGame = () => {
           )}
         </div>
 
-        <div style={{ 
-          marginTop: '20px', 
-          textAlign: 'center', 
-          color: 'white',
-          textShadow: '1px 1px 2px rgba(0,0,0,0.7)'
-        }}>
-          <p><strong>Controls:</strong> Press Space or Click to Flap</p>
-          <p>Avoid the pipes and survive as long as possible!</p>
-          
-          {/* Added a visible button for mobile and as a fallback */}
-          <button 
-            onClick={handleJump}
-            style={{
-              marginTop: '10px',
-              padding: '10px 20px',
-              fontSize: '16px',
-              backgroundColor: '#FFD700',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              color: '#333'
-            }}
-          >
-            {!gameStarted || gameOver ? 'Start Game' : 'Jump'}
-          </button>
-        </div>
+       
       </div>
 
       {/* Task Tracker */}
