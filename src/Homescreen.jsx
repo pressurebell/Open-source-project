@@ -22,7 +22,7 @@ export default function Homescreen() {
   }}
 >
   <Typography variant="h4" gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontSize: "90px" ,color:'white',marginBottom:'20px' }}>
-   Game Productivity Tracker
+  "Gaming Efficiency Tracker"
   </Typography>
   <Typography variant="h6" gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontSize: "20px",color:'white' }}>
   "Boost Your Productivity: Master Gaming Session Tracking Like a Pro!"
@@ -31,10 +31,10 @@ export default function Homescreen() {
     variant="outlined"
     color="success"
     sx={{ marginTop: "10px", padding: "20px", borderRadius: "10px" }}
-    endIcon={<ArrowForwardIcon />}
+    // endIcon={<ArrowForwardIcon />}
     onClick={() => navigate("/game")}
   >
-    Get Started!
+    Get Started
   </Button>
 </Box>
   
