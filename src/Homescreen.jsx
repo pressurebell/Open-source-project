@@ -21,8 +21,8 @@ export default function Homescreen() {
     fontFamily: '"Orbitron", sans-serif',
   }}
 >
-  <Typography variant="h4" gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontSize: "90px" ,color:'white',marginBottom:'20px' }}>
-  "Gaming Efficiency Tracker"
+  <Typography variant="h4" gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontSize: "70px" ,color:'white',marginBottom:'20px' }}>
+  "Gaming Productivity Tracker"
   </Typography>
   <Typography variant="h6" gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontSize: "20px",color:'white' }}>
   "Boost Your Productivity: Master Gaming Session Tracking Like a Pro!"
