@@ -15,7 +15,7 @@ export default function Homescreen() {
     justifyContent: "center",
     height: "100vh",
     backgroundColor: "#FFDAB9",
-    backgroundImage: `url("/pictures/earth.jpg")`,
+    backgroundImage: `url("/pictures/wallpaper.jpg")`,
     backgroundSize: "cover",
     backgroundPosition: "center",
     fontFamily: '"Orbitron", sans-serif',
@@ -28,8 +28,8 @@ export default function Homescreen() {
   "Boost Your Productivity: Master Gaming Session Tracking Like a Pro!"
   </Typography>
   <Button
-    variant="outlined"
-    color="success"
+    variant="contained"
+    color="primary"
     sx={{ marginTop: "10px", padding: "20px", borderRadius: "10px" }}
     endIcon={<ArrowForwardIcon />}
     onClick={() => navigate("/game")}

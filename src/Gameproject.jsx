@@ -239,7 +239,7 @@ const FlappyBirdGame = () => {
       padding: '20px',
       backgroundImage: `url("/pictures/background.jpg")`,
       backgroundSize: "cover",
-    backgroundPosition: "center",
+      backgroundPosition: "center",
       minHeight: '100vh',
     }}>
       <div style={{
