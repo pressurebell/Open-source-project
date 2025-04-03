@@ -31,7 +31,7 @@ export default function Homescreen() {
     variant="outlined"
     color="success"
     sx={{ marginTop: "10px", padding: "20px", borderRadius: "10px" }}
-    // endIcon={<ArrowForwardIcon />}
+    endIcon={<ArrowForwardIcon />}
     onClick={() => navigate("/game")}
   >
     Get Started
