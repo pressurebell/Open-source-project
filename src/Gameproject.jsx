@@ -237,7 +237,7 @@ const FlappyBirdGame = () => {
       fontFamily: 'Arial, sans-serif',
       gap: '20px',
       padding: '20px',
-      backgroundImage: `url("/pictures/images.jpg")`,
+      backgroundImage: `url("/pictures/background.jpg")`,
       backgroundSize: "cover",
     backgroundPosition: "center",
       minHeight: '100vh',
@@ -461,7 +461,8 @@ const FlappyBirdGame = () => {
         borderRadius: '8px',
         padding: '15px',
         boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
-        zIndex: 2
+        zIndex: 2,
+        margin: '90px',
       }}>
         <h2 style={{ 
           borderBottom: '2px solid #3AC14A', 
@@ -480,7 +481,9 @@ const FlappyBirdGame = () => {
               padding: '8px',
               backgroundColor: task.completed ? '#e6ffe6' : 'white',
               borderRadius: '4px',
-              border: '1px solid #ddd'
+              border: '1px solid #ddd',
+
+              
             }}>
               <div style={{
                 width: '20px',
