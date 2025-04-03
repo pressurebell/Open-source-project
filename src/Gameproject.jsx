@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const FlappyBirdGame = () => {
   const GAME_WIDTH = 400;
@@ -8,6 +8,7 @@ const FlappyBirdGame = () => {
   const PIPE_WIDTH = 60;
   const GRAVITY = 0.5;
   const JUMP_FORCE = -10;
+  const DROP_FORCE = 5; // Force for pressing down key
   const PIPE_GAP = 150;
   const PIPE_SPEED = 2;
   
@@ -177,35 +178,55 @@ const FlappyBirdGame = () => {
     setGameOver(true);
   };
   
-  const handleJump = () => {
-    if (!gameStarted || gameOver) {
+  const handleJump = useCallback(() => {
+    if (!gameStarted) {
+      startGame();
+    } else if (gameOver) {
       startGame();
     } else {
       // Just make the bird jump if the game is already running
       setBirdVelocity(JUMP_FORCE);
     }
-  };
+  }, [gameStarted, gameOver]);
+
+  const handleDropFaster = useCallback(() => {
+    if (gameStarted && !gameOver) {
+      setBirdVelocity(prev => prev + DROP_FORCE);
+    }
+  }, [gameStarted, gameOver]);
   
-  // Set up key listener for space bar
+  // Handle keyboard controls separately from the game container focus
   useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (e.code === 'Space' || e.key === ' ') {
+    const handleKeyDown = (e) => {
+      // Prevent scrolling with arrow keys and space
+      if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'ArrowDown') {
         e.preventDefault();
+      }
+      
+      if (e.code === 'Space' || e.code === 'ArrowUp') {
         handleJump();
+      } else if (e.code === 'ArrowDown') {
+        handleDropFaster();
       }
     };
     
-    // Add event listener to window
-    window.addEventListener('keydown', handleKeyPress);
+    // Add global event listener
+    window.addEventListener('keydown', handleKeyDown);
     
-    // Cleanup on component unmount
+    // Clean up
     return () => {
-      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [gameStarted, gameOver, handleJump, handleDropFaster]); // Added missing dependencies
+  
+  // Cleanup intervals on component unmount
+  useEffect(() => {
+    return () => {
       if (gameLoopRef.current) clearInterval(gameLoopRef.current);
       if (timeCounterRef.current) clearInterval(timeCounterRef.current);
       gameRunningRef.current = false;
     };
-  }, []); // Empty dependency array to only add the listener once
+  }, []);
   
   return (
     <div style={{ 
@@ -216,7 +237,7 @@ const FlappyBirdGame = () => {
       fontFamily: 'Arial, sans-serif',
       gap: '20px',
       padding: '20px',
-      backgroundColor: '#87CEEB',
+      backgroungImage: 'url("/Pictures/download.jpg")',
       minHeight: '100vh',
     }}>
       <div style={{
@@ -376,14 +397,15 @@ const FlappyBirdGame = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                alignItems: 'felx-start',
+                alignItems: 'center',
                 backgroundColor: 'rgba(0,0,0,0.5)',
                 color: 'white',
                 zIndex: 20
               }}
             >
               <h2>Flappy Bird</h2>
-              <p>Press Space or Click to Start</p>
+              <p>Press Space/Up Arrow or Click to Start</p>
+              <p>Use Down Arrow to drop faster</p>
             </div>
           )}
 
@@ -408,7 +430,7 @@ const FlappyBirdGame = () => {
               <h2>Game Over</h2>
               <p>Score: {score}</p>
               <p>Time: {gameTime}s</p>
-              <p>Press Space or Click to Restart</p>
+              <p>Press Space/Up Arrow or Click to Restart</p>
               <button 
                 onClick={startGame}
                 style={{
@@ -428,8 +450,6 @@ const FlappyBirdGame = () => {
             </div>
           )}
         </div>
-
-       
       </div>
 
       {/* Task Tracker */}
@@ -495,6 +515,17 @@ const FlappyBirdGame = () => {
           <p style={{ margin: '5px 0' }}><strong>Current Score:</strong> {score}</p>
           <p style={{ margin: '5px 0' }}><strong>Time:</strong> {gameTime} seconds</p>
           <p style={{ margin: '5px 0' }}><strong>Tasks Completed:</strong> {tasks.filter(t => t.completed).length}/{tasks.length}</p>
+        </div>
+        <div style={{
+          marginTop: '15px',
+          padding: '10px',
+          backgroundColor: '#f0f0f0',
+          borderRadius: '4px'
+        }}>
+          <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>Controls</h3>
+          <p style={{ margin: '5px 0' }}><strong>Space/Up Arrow:</strong> Jump</p>
+          <p style={{ margin: '5px 0' }}><strong>Down Arrow:</strong> Drop faster</p>
+          <p style={{ margin: '5px 0' }}><strong>Click:</strong> Jump</p>
         </div>
       </div>
     </div>
