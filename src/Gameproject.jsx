@@ -11,6 +11,7 @@ const FlappyBirdGame = () => {
   const DROP_FORCE = 5; // Force for pressing down key
   const PIPE_GAP = 150;
   const PIPE_SPEED = 2;
+  const PIPE_DISTANCE = 250; // Distance between pipes
   
   const [birdPosition, setBirdPosition] = useState(GAME_HEIGHT / 2);
   const [birdVelocity, setBirdVelocity] = useState(0);
@@ -20,52 +21,52 @@ const FlappyBirdGame = () => {
   const [score, setScore] = useState(0);
   const [gameTime, setGameTime] = useState(0);
   
+  // Custom tasks that user can toggle manually
   const [tasks, setTasks] = useState([
-    { id: 1, text: 'Score 5 points', completed: false },
-    { id: 2, text: 'Pass through 10 pipes', completed: false },
-    { id: 3, text: 'Survive for 30 seconds', completed: false }
+    { id: 1, text: 'Avoid hitting any pipes', completed: false },
+    { id: 2, text: 'Play for at least 1 minute', completed: false },
+    { id: 3, text: 'Score at least 10 points', completed: false },
+    { id: 4, text: 'Use down arrow 5 times', completed: false }
   ]);
   
   const gameLoopRef = useRef(null);
   const timeCounterRef = useRef(null);
   const gameRunningRef = useRef(false);
   const gameContainerRef = useRef(null);
+  const lastPipeRef = useRef(null);
   
-  // Update tasks based on game progress
-  useEffect(() => {
-    if (gameStarted && !gameOver) {
-      setTasks(prevTasks => 
-        prevTasks.map(task => {
-          if (task.id === 1) {
-            return { ...task, completed: score >= 5 };
-          } else if (task.id === 2) {
-            return { ...task, completed: score >= 10 };
-          } else if (task.id === 3) {
-            return { ...task, completed: gameTime >= 30 };
-          }
-          return task;
-        })
-      );
-    }
-  }, [score, gameTime, gameStarted, gameOver]);
+  // Function to toggle task completion manually
+  const toggleTaskCompletion = (taskId) => {
+    setTasks(prevTasks => 
+      prevTasks.map(task => {
+        if (task.id === taskId) {
+          return { ...task, completed: !task.completed };
+        }
+        return task;
+      })
+    );
+  };
   
-  // Initialize first pipe when game starts
-  useEffect(() => {
-    if (gameStarted && pipes.length === 0) {
-      addNewPipe();
-    }
-  }, [gameStarted, pipes.length]);
-  
-  const addNewPipe = () => {
-    const topHeight = Math.floor(Math.random() * (GAME_HEIGHT - PIPE_GAP - 100)) + 50;
+  // Create a function that returns a new pipe
+  const createNewPipe = () => {
+    const topHeight = Math.floor(Math.random() * (GAME_HEIGHT - PIPE_GAP - 150)) + 50;
     const bottomY = topHeight + PIPE_GAP;
-    setPipes(prev => [...prev, {
+    return {
+      id: Date.now(), // Add unique id for each pipe
       x: GAME_WIDTH,
       topHeight,
       bottomY,
       passed: false
-    }]);
+    };
   };
+  
+  // Initialize first pipe when game starts
+  useEffect(() => {
+    if (gameStarted && pipes.length === 0) {
+      setPipes([createNewPipe()]);
+      lastPipeRef.current = GAME_WIDTH;
+    }
+  }, [gameStarted, pipes.length]);
   
   const startGame = () => {
     // Clear any existing intervals first
@@ -76,14 +77,15 @@ const FlappyBirdGame = () => {
     setGameOver(false);
     setBirdPosition(GAME_HEIGHT / 2);
     setBirdVelocity(0);
-    setPipes([]);
+    
+    // Initialize with one pipe
+    setPipes([createNewPipe()]);
+    lastPipeRef.current = GAME_WIDTH;
+    
     setScore(0);
     setGameTime(0);
     
-    // Reset tasks
-    setTasks(prevTasks => 
-      prevTasks.map(task => ({ ...task, completed: false }))
-    );
+    // Reset tasks (but keep completed status since user manages them manually)
     
     // Use a flag to track if game is running
     gameRunningRef.current = true;
@@ -134,7 +136,7 @@ const FlappyBirdGame = () => {
         x: pipe.x - PIPE_SPEED
       }));
       
-      // Check for scoring
+      // Check for pipe passed (scoring)
       updatedPipes.forEach(pipe => {
         if (!pipe.passed && pipe.x < 100 - PIPE_WIDTH) {
           pipe.passed = true;
@@ -146,15 +148,9 @@ const FlappyBirdGame = () => {
       const visiblePipes = updatedPipes.filter(pipe => pipe.x > -PIPE_WIDTH);
       
       // Add new pipe when needed
-      if (visiblePipes.length === 0 || visiblePipes[visiblePipes.length - 1].x < GAME_WIDTH - 200) {
-        const topHeight = Math.floor(Math.random() * (GAME_HEIGHT - PIPE_GAP - 100)) + 50;
-        const bottomY = topHeight + PIPE_GAP;
-        visiblePipes.push({
-          x: GAME_WIDTH,
-          topHeight,
-          bottomY,
-          passed: false
-        });
+      const lastPipe = visiblePipes[visiblePipes.length - 1];
+      if (lastPipe && GAME_WIDTH - lastPipe.x >= PIPE_DISTANCE) {
+        visiblePipes.push(createNewPipe());
       }
       
       // Check for collisions
@@ -217,7 +213,7 @@ const FlappyBirdGame = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [gameStarted, gameOver, handleJump, handleDropFaster]); // Added missing dependencies
+  }, [gameStarted, gameOver, handleJump, handleDropFaster]);
   
   // Cleanup intervals on component unmount
   useEffect(() => {
@@ -305,21 +301,9 @@ const FlappyBirdGame = () => {
             }}/>
           </div>
 
-          {/* Ground */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '0',
-              width: '100%',
-              height: '50px',
-              backgroundColor: '#8B4513',
-              borderTop: '2px solid #5D4037'
-            }}
-          />
-
-          {/* Pipes */}
-          {pipes.map((pipe, index) => (
-            <React.Fragment key={index}>
+          {/* Pipes - Explicitly rendered with fixed positions for visibility */}
+          {pipes.map((pipe) => (
+            <React.Fragment key={pipe.id}>
               {/* Top pipe */}
               <div
                 style={{
@@ -329,11 +313,27 @@ const FlappyBirdGame = () => {
                   width: `${PIPE_WIDTH}px`,
                   height: `${pipe.topHeight}px`,
                   backgroundColor: '#3AC14A',
-                  borderRight: '2px solid black',
-                  borderLeft: '2px solid black',
-                  borderBottom: '2px solid black'
+                  borderRight: '3px solid #2C9939',
+                  borderLeft: '3px solid #2C9939',
+                  borderBottom: '3px solid #2C9939',
+                  boxSizing: 'border-box',
+                  zIndex: 5
                 }}
-              />
+              >
+                {/* Pipe cap */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-15px',
+                  left: '-5px',
+                  width: `${PIPE_WIDTH + 10}px`,
+                  height: '15px',
+                  backgroundColor: '#3AC14A',
+                  borderRadius: '0 0 5px 5px',
+                  border: '3px solid #2C9939',
+                  boxSizing: 'border-box'
+                }} />
+              </div>
+              
               {/* Bottom pipe */}
               <div
                 style={{
@@ -343,13 +343,41 @@ const FlappyBirdGame = () => {
                   width: `${PIPE_WIDTH}px`,
                   height: `${GAME_HEIGHT - pipe.bottomY}px`,
                   backgroundColor: '#3AC14A',
-                  borderRight: '2px solid black', 
-                  borderLeft: '2px solid black',
-                  borderTop: '2px solid black'
+                  borderRight: '3px solid #2C9939',
+                  borderLeft: '3px solid #2C9939',
+                  borderTop: '3px solid #2C9939',
+                  boxSizing: 'border-box',
+                  zIndex: 5
                 }}
-              />
+              >
+                {/* Pipe cap */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-15px',
+                  left: '-5px',
+                  width: `${PIPE_WIDTH + 10}px`,
+                  height: '15px',
+                  backgroundColor: '#3AC14A',
+                  borderRadius: '5px 5px 0 0',
+                  border: '3px solid #2C9939',
+                  boxSizing: 'border-box'
+                }} />
+              </div>
             </React.Fragment>
           ))}
+
+          {/* Ground */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '0',
+              width: '100%',
+              height: '50px',
+              backgroundColor: '#8B4513',
+              borderTop: '2px solid #5D4037',
+              zIndex: 6
+            }}
+          />
 
           {/* Score */}
           {gameStarted && (
@@ -454,7 +482,7 @@ const FlappyBirdGame = () => {
         </div>
       </div>
 
-      {/* Task Tracker */}
+      {/* Task Tracker - Modified for manual toggling */}
       <div style={{
         width: '250px',
         backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -462,7 +490,7 @@ const FlappyBirdGame = () => {
         padding: '15px',
         boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
         zIndex: 2,
-        margin: '90px',
+        margin: '90px 20px 0 20px',
       }}>
         <h2 style={{ 
           borderBottom: '2px solid #3AC14A', 
@@ -470,7 +498,7 @@ const FlappyBirdGame = () => {
           marginTop: 0,
           color: '#333'
         }}>
-          Task Tracker
+          My Tasks
         </h2>
         <div>
           {tasks.map(task => (
@@ -482,9 +510,10 @@ const FlappyBirdGame = () => {
               backgroundColor: task.completed ? '#e6ffe6' : 'white',
               borderRadius: '4px',
               border: '1px solid #ddd',
-
-              
-            }}>
+              cursor: 'pointer',
+            }}
+            onClick={() => toggleTaskCompletion(task.id)}
+            >
               <div style={{
                 width: '20px',
                 height: '20px',
@@ -510,6 +539,37 @@ const FlappyBirdGame = () => {
             </div>
           ))}
         </div>
+        
+        {/* Add Task Button */}
+        <button
+          onClick={() => {
+            const newTaskText = prompt("Enter a new task:");
+            if (newTaskText && newTaskText.trim() !== "") {
+              setTasks(prevTasks => [
+                ...prevTasks, 
+                { 
+                  id: Date.now(), 
+                  text: newTaskText.trim(), 
+                  completed: false 
+                }
+              ]);
+            }
+          }}
+          style={{
+            width: '100%',
+            padding: '8px',
+            marginTop: '15px',
+            backgroundColor: '#3AC14A',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          Add New Task
+        </button>
+        
         <div style={{ 
           marginTop: '20px',
           padding: '10px',
@@ -531,6 +591,7 @@ const FlappyBirdGame = () => {
           <p style={{ margin: '5px 0' }}><strong>Space/Up Arrow:</strong> Jump</p>
           <p style={{ margin: '5px 0' }}><strong>Down Arrow:</strong> Drop faster</p>
           <p style={{ margin: '5px 0' }}><strong>Click:</strong> Jump</p>
+          <p style={{ margin: '5px 0' }}><strong>Task Click:</strong> Toggle completion</p>
         </div>
       </div>
     </div>
