@@ -4,7 +4,7 @@ const SplashScreen = ({ isLoading }) => {
   return (
     <div className={`splash-screen ${isLoading ? 'active' : ''}`}>
       <div className="splash-logo">
-        <div className="splash-logo-text">APP</div>
+        <div className="splash-logo-text">SAP</div>
       </div>
       <div className="splash-spinner"></div>
       
