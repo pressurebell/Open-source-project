@@ -25,10 +25,9 @@ const FlappyBirdGame = () => {
   
   // Tasks that update automatically based on game events
   const [tasks, setTasks] = useState([
-    { id: 1, text: 'Avoid hitting any pipes', completed: false },
-    { id: 2, text: 'Play for at least 1 minute', completed: false },
-    { id: 3, text: 'Score at least 10 points', completed: false },
-    { id: 4, text: 'Use down arrow 5 times', completed: false }
+    { id: 1, text: 'Read a Book', completed: false },
+    { id: 2, text: 'Went For Run', completed: false },
+    { id: 3, text: 'Reduced Screen time by 1 Hour', completed: false },
   ]);
   
   const gameLoopRef = useRef(null);
@@ -563,8 +562,7 @@ const FlappyBirdGame = () => {
           )}
         </div>
       </div>
-
-      {/* Task Tracker - Now fully automated */}
+     {/* Task Tracker - Now fully automated */}
       <div style={{
         width: '250px',
         backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -656,6 +654,7 @@ const FlappyBirdGame = () => {
           <p style={{ margin: '5px 0' }}><strong>Down Key Count:</strong> {downKeyCount}/5</p>
           <p style={{ margin: '5px 0' }}><strong>Challenges Completed:</strong> {tasks.filter(t => t.completed).length}/{tasks.length}</p>
         </div>
+        
         <div style={{
           marginTop: '15px',
           padding: '10px',
