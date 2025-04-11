@@ -315,7 +315,7 @@ const FlappyBirdGame = () => {
       fontFamily: 'Arial, sans-serif',
       gap: '20px',
       padding: '20px',
-      backgroundImage: `url("/pictures/bg.jpg")`,
+      backgroundImage: `url("/pictures/wallpaper.jpg")`,
       backgroundSize: "cover",
       backgroundPosition: "center",
       minHeight: '100vh',
