@@ -6,9 +6,9 @@ const FlappyBirdGame = () => {
   const BIRD_WIDTH = 30;
   const BIRD_HEIGHT = 30;
   const PIPE_WIDTH = 60;
-  const GRAVITY = 0.5;
-  const JUMP_FORCE = -10;
-  const DROP_FORCE = 5; // Force for pressing down key
+  const GRAVITY = 0.3;
+  const JUMP_FORCE = -6;
+  const DROP_FORCE = 2; // Force for pressing down key
   const PIPE_GAP = 150;
   const PIPE_SPEED = 2;
   
@@ -21,9 +21,9 @@ const FlappyBirdGame = () => {
   const [gameTime, setGameTime] = useState(0);
   
   const [tasks, setTasks] = useState([
-    { id: 1, text: 'Score 5 points', completed: false },
-    { id: 2, text: 'Pass through 10 pipes', completed: false },
-    { id: 3, text: 'Survive for 30 seconds', completed: false }
+    { id: 1, text: 'Read 5 pages of a book', completed: false },
+    { id: 2, text: 'Drink 2 litres of water', completed: false },
+    { id: 3, text: 'Reduced screentime for 1 hour', completed: false }
   ]);
   
   const gameLoopRef = useRef(null);
@@ -113,12 +113,11 @@ const FlappyBirdGame = () => {
     if (gameOver) return;
     
     // Update bird position and apply gravity
-    setBirdPosition(prev => {
-      const newPosition = prev + birdVelocity;
-      return newPosition;
-    });
-    
-    setBirdVelocity(prev => prev + GRAVITY);
+    setBirdVelocity(prevVelocity => {
+      const newVelocity = prevVelocity + GRAVITY;
+      setBirdPosition(prevPosition => prevPosition + newVelocity);
+      return newVelocity;
+    });    
     
     // Check if bird hits boundaries
     if (birdPosition <= 0 || birdPosition >= GAME_HEIGHT - 50 - BIRD_HEIGHT) {
@@ -191,7 +190,7 @@ const FlappyBirdGame = () => {
 
   const handleDropFaster = useCallback(() => {
     if (gameStarted && !gameOver) {
-      setBirdVelocity(prev => prev + DROP_FORCE);
+      setBirdVelocity(prev => Math.min(prev + DROP_FORCE, 15));
     }
   }, [gameStarted, gameOver]);
   
