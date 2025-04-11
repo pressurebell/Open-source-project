@@ -20,8 +20,10 @@ const FlappyBirdGame = () => {
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [gameTime, setGameTime] = useState(0);
+  const [downKeyCount, setDownKeyCount] = useState(0); // Track down key presses
+  const [hasHitPipe, setHasHitPipe] = useState(false); // Track if bird has hit a pipe
   
-  // Custom tasks that user can toggle manually
+  // Tasks that update automatically based on game events
   const [tasks, setTasks] = useState([
     { id: 1, text: 'Avoid hitting any pipes', completed: false },
     { id: 2, text: 'Play for at least 1 minute', completed: false },
@@ -34,18 +36,15 @@ const FlappyBirdGame = () => {
   const gameRunningRef = useRef(false);
   const gameContainerRef = useRef(null);
   const lastPipeRef = useRef(null);
+  const birdPositionRef = useRef(birdPosition);
+  const birdVelocityRef = useRef(birdVelocity);
+  const pipeHitCheckedRef = useRef(false);
   
-  // Function to toggle task completion manually
-  const toggleTaskCompletion = (taskId) => {
-    setTasks(prevTasks => 
-      prevTasks.map(task => {
-        if (task.id === taskId) {
-          return { ...task, completed: !task.completed };
-        }
-        return task;
-      })
-    );
-  };
+  // Keep refs updated with latest state
+  useEffect(() => {
+    birdPositionRef.current = birdPosition;
+    birdVelocityRef.current = birdVelocity;
+  }, [birdPosition, birdVelocity]);
   
   // Create a function that returns a new pipe
   const createNewPipe = () => {
@@ -68,6 +67,40 @@ const FlappyBirdGame = () => {
     }
   }, [gameStarted, pipes.length]);
   
+  // Check for task completion - runs on every relevant state change
+  useEffect(() => {
+    if (gameStarted) {
+      // Update tasks based on game state
+      setTasks(prevTasks => 
+        prevTasks.map(task => {
+          switch (task.id) {
+            case 1: // Avoid hitting pipes task
+              // Will be marked as complete when the game ends without hitting a pipe
+              return { ...task, completed: gameOver && !hasHitPipe };
+            case 2: // Play for 1 minute task
+              return { ...task, completed: gameTime >= 60 };
+            case 3: // Score 10 points task
+              return { ...task, completed: score >= 10 };
+            case 4: // Use down arrow 5 times
+              return { ...task, completed: downKeyCount >= 5 };
+            default:
+              return task;
+          }
+        })
+      );
+    }
+  }, [gameTime, score, downKeyCount, gameOver, hasHitPipe, gameStarted]);
+  
+  // Reset tasks when game restarts
+  const resetTasks = () => {
+    setTasks(prevTasks => 
+      prevTasks.map(task => ({
+        ...task,
+        completed: false
+      }))
+    );
+  };
+  
   const startGame = () => {
     // Clear any existing intervals first
     if (gameLoopRef.current) clearInterval(gameLoopRef.current);
@@ -77,6 +110,8 @@ const FlappyBirdGame = () => {
     setGameOver(false);
     setBirdPosition(GAME_HEIGHT / 2);
     setBirdVelocity(0);
+    setHasHitPipe(false);
+    pipeHitCheckedRef.current = false;
     
     // Initialize with one pipe
     setPipes([createNewPipe()]);
@@ -84,8 +119,10 @@ const FlappyBirdGame = () => {
     
     setScore(0);
     setGameTime(0);
+    setDownKeyCount(0);
     
-    // Reset tasks (but keep completed status since user manages them manually)
+    // Reset tasks for new game
+    resetTasks();
     
     // Use a flag to track if game is running
     gameRunningRef.current = true;
@@ -115,16 +152,19 @@ const FlappyBirdGame = () => {
     if (gameOver) return;
     
     // Update bird position and apply gravity
-    setBirdPosition(prev => {
-      const newPosition = prev + birdVelocity;
-      return newPosition;
-    });
+    const newPosition = birdPositionRef.current + birdVelocityRef.current;
+    const newVelocity = birdVelocityRef.current + GRAVITY;
     
-    setBirdVelocity(prev => prev + GRAVITY);
+    setBirdPosition(newPosition);
+    setBirdVelocity(newVelocity);
+    
+    // Update refs immediately for keyboard response
+    birdPositionRef.current = newPosition;
+    birdVelocityRef.current = newVelocity;
     
     // Check if bird hits boundaries
-    if (birdPosition <= 0 || birdPosition >= GAME_HEIGHT - 50 - BIRD_HEIGHT) {
-      endGame();
+    if (newPosition <= 0 || newPosition >= GAME_HEIGHT - 50 - BIRD_HEIGHT) {
+      endGame(false); // Bird hit top/bottom boundary, not a pipe
       return;
     }
     
@@ -158,9 +198,9 @@ const FlappyBirdGame = () => {
         if (
           100 + BIRD_WIDTH > pipe.x && 
           100 < pipe.x + PIPE_WIDTH && 
-          (birdPosition < pipe.topHeight || birdPosition + BIRD_HEIGHT > pipe.bottomY)
+          (newPosition < pipe.topHeight || newPosition + BIRD_HEIGHT > pipe.bottomY)
         ) {
-          endGame();
+          endGame(true); // Bird hit a pipe
           break;
         }
       }
@@ -169,9 +209,28 @@ const FlappyBirdGame = () => {
     });
   };
   
-  const endGame = () => {
+  const endGame = (hitPipe) => {
     gameRunningRef.current = false;
     setGameOver(true);
+    
+    // Only set hasHitPipe if it's true and hasn't been checked before
+    if (hitPipe && !pipeHitCheckedRef.current) {
+      setHasHitPipe(true);
+      pipeHitCheckedRef.current = true;
+    }
+    
+    // If game ends without hitting a pipe and lasted more than a few seconds,
+    // mark the "avoid hitting pipes" task as complete
+    if (!hitPipe && gameTime > 5) {
+      setTasks(prevTasks => 
+        prevTasks.map(task => {
+          if (task.id === 1) {
+            return { ...task, completed: true };
+          }
+          return task;
+        })
+      );
+    }
   };
   
   const handleJump = useCallback(() => {
@@ -180,18 +239,41 @@ const FlappyBirdGame = () => {
     } else if (gameOver) {
       startGame();
     } else {
-      // Just make the bird jump if the game is already running
-      setBirdVelocity(JUMP_FORCE);
+      // Set velocity directly for immediate effect
+      const jumpVelocity = JUMP_FORCE;
+      setBirdVelocity(jumpVelocity);
+      birdVelocityRef.current = jumpVelocity; // Update ref immediately
     }
   }, [gameStarted, gameOver]);
 
   const handleDropFaster = useCallback(() => {
     if (gameStarted && !gameOver) {
-      setBirdVelocity(prev => prev + DROP_FORCE);
+      // Set velocity directly for immediate effect
+      const dropVelocity = birdVelocityRef.current + DROP_FORCE;
+      setBirdVelocity(dropVelocity);
+      birdVelocityRef.current = dropVelocity; // Update ref immediately
+      
+      // Increment down key counter
+      setDownKeyCount(prev => prev + 1);
     }
   }, [gameStarted, gameOver]);
   
-  // Handle keyboard controls separately from the game container focus
+  // Function to add a custom task
+  const addCustomTask = (taskText) => {
+    if (taskText && taskText.trim() !== "") {
+      setTasks(prevTasks => [
+        ...prevTasks, 
+        { 
+          id: Date.now(), 
+          text: taskText.trim(), 
+          completed: false,
+          isCustom: true // Flag to identify custom tasks
+        }
+      ]);
+    }
+  };
+  
+  // Handle keyboard controls
   useEffect(() => {
     const handleKeyDown = (e) => {
       // Prevent scrolling with arrow keys and space
@@ -213,7 +295,7 @@ const FlappyBirdGame = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [gameStarted, gameOver, handleJump, handleDropFaster]);
+  }, [handleJump, handleDropFaster]);
   
   // Cleanup intervals on component unmount
   useEffect(() => {
@@ -233,7 +315,7 @@ const FlappyBirdGame = () => {
       fontFamily: 'Arial, sans-serif',
       gap: '20px',
       padding: '20px',
-      backgroundImage: `url("/pictures/background.jpg")`,
+      backgroundImage: `url("/pictures/bg.jpg")`,
       backgroundSize: "cover",
       backgroundPosition: "center",
       minHeight: '100vh',
@@ -301,7 +383,7 @@ const FlappyBirdGame = () => {
             }}/>
           </div>
 
-          {/* Pipes - Explicitly rendered with fixed positions for visibility */}
+          {/* Pipes */}
           {pipes.map((pipe) => (
             <React.Fragment key={pipe.id}>
               {/* Top pipe */}
@@ -482,7 +564,7 @@ const FlappyBirdGame = () => {
         </div>
       </div>
 
-      {/* Task Tracker - Modified for manual toggling */}
+      {/* Task Tracker - Now fully automated */}
       <div style={{
         width: '250px',
         backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -498,7 +580,7 @@ const FlappyBirdGame = () => {
           marginTop: 0,
           color: '#333'
         }}>
-          My Tasks
+          Game Challenges
         </h2>
         <div>
           {tasks.map(task => (
@@ -510,10 +592,8 @@ const FlappyBirdGame = () => {
               backgroundColor: task.completed ? '#e6ffe6' : 'white',
               borderRadius: '4px',
               border: '1px solid #ddd',
-              cursor: 'pointer',
-            }}
-            onClick={() => toggleTaskCompletion(task.id)}
-            >
+              transition: 'all 0.3s ease'
+            }}>
               <div style={{
                 width: '20px',
                 height: '20px',
@@ -526,7 +606,8 @@ const FlappyBirdGame = () => {
                 justifyContent: 'center',
                 color: 'white',
                 fontWeight: 'bold',
-                fontSize: '12px'
+                fontSize: '12px',
+                transition: 'background-color 0.3s ease'
               }}>
                 {task.completed && '✓'}
               </div>
@@ -543,16 +624,9 @@ const FlappyBirdGame = () => {
         {/* Add Task Button */}
         <button
           onClick={() => {
-            const newTaskText = prompt("Enter a new task:");
-            if (newTaskText && newTaskText.trim() !== "") {
-              setTasks(prevTasks => [
-                ...prevTasks, 
-                { 
-                  id: Date.now(), 
-                  text: newTaskText.trim(), 
-                  completed: false 
-                }
-              ]);
+            const newTaskText = prompt("Enter a new challenge:");
+            if (newTaskText) {
+              addCustomTask(newTaskText);
             }
           }}
           style={{
@@ -567,7 +641,7 @@ const FlappyBirdGame = () => {
             fontWeight: 'bold'
           }}
         >
-          Add New Task
+          Add Custom Challenge
         </button>
         
         <div style={{ 
@@ -579,7 +653,8 @@ const FlappyBirdGame = () => {
           <h3 style={{ margin: '0 0 10px 0', color: '#3AC14A' }}>Game Stats</h3>
           <p style={{ margin: '5px 0' }}><strong>Current Score:</strong> {score}</p>
           <p style={{ margin: '5px 0' }}><strong>Time:</strong> {gameTime} seconds</p>
-          <p style={{ margin: '5px 0' }}><strong>Tasks Completed:</strong> {tasks.filter(t => t.completed).length}/{tasks.length}</p>
+          <p style={{ margin: '5px 0' }}><strong>Down Key Count:</strong> {downKeyCount}/5</p>
+          <p style={{ margin: '5px 0' }}><strong>Challenges Completed:</strong> {tasks.filter(t => t.completed).length}/{tasks.length}</p>
         </div>
         <div style={{
           marginTop: '15px',
@@ -591,7 +666,6 @@ const FlappyBirdGame = () => {
           <p style={{ margin: '5px 0' }}><strong>Space/Up Arrow:</strong> Jump</p>
           <p style={{ margin: '5px 0' }}><strong>Down Arrow:</strong> Drop faster</p>
           <p style={{ margin: '5px 0' }}><strong>Click:</strong> Jump</p>
-          <p style={{ margin: '5px 0' }}><strong>Task Click:</strong> Toggle completion</p>
         </div>
       </div>
     </div>
