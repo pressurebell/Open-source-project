@@ -7,7 +7,7 @@ const FlappyBirdGame = () => {
   const BIRD_HEIGHT = 30;
   const PIPE_WIDTH = 60;
   const GRAVITY = 0.5;
-  const JUMP_FORCE = -5;
+  const JUMP_FORCE = -10;
   const DROP_FORCE = 5; // Force for pressing down key
   const PIPE_GAP = 170;
   const PIPE_SPEED = 2;
