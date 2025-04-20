@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const FlappyBirdGame = () => {
+  const [customTaskInput, setCustomTaskInput] = useState('');
+  const [showModal, setShowModal] = useState(false);
+
   const GAME_WIDTH = 400;
   const GAME_HEIGHT = 500;
   const BIRD_WIDTH = 30;
@@ -618,14 +621,74 @@ const FlappyBirdGame = () => {
             </div>
           ))}
         </div>
+        {showModal && (
+  <div style={{
+    position: 'fixed',
+    top: 0, left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000
+  }}>
+    <div style={{
+      background: 'white',
+      padding: '20px',
+      borderRadius: '8px',
+      width: '300px',
+      textAlign: 'center',
+      boxShadow: '0 0 10px rgba(0,0,0,0.25)'
+    }}>
+      <h3>Enter a new challenge</h3>
+      <input
+        type="text"
+        value={customTaskInput}
+        onChange={(e) => setCustomTaskInput(e.target.value)}
+        style={{
+          width: '100%',
+          padding: '8px',
+          marginBottom: '10px',
+          border: '1px solid #ccc',
+          borderRadius: '4px'
+        }}
+      />
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <button onClick={() => {
+          if (customTaskInput.trim()) {
+            addCustomTask(customTaskInput);
+          }
+          setCustomTaskInput('');
+          setShowModal(false);
+        }} style={{
+          padding: '8px 16px',
+          backgroundColor: '#3AC14A',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          fontWeight: 'bold'
+        }}>OK</button>
+        <button onClick={() => {
+          setCustomTaskInput('');
+          setShowModal(false);
+        }} style={{
+          padding: '8px 16px',
+          backgroundColor: '#ccc',
+          color: '#333',
+          border: 'none',
+          borderRadius: '4px'
+        }}>Cancel</button>
+      </div>
+    </div>
+  </div>
+)}
+
         
         {/* Add Task Button */}
         <button
           onClick={() => {
-            const newTaskText = prompt("Enter a new challenge:");
-            if (newTaskText) {
-              addCustomTask(newTaskText);
-            }
+            setShowModal(true);
           }}
           style={{
             width: '100%',
