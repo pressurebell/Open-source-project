@@ -22,7 +22,7 @@ export default function Homescreen() {
   }}
 >
   <Typography variant="h4" gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontSize: "70px" ,color:'white',marginBottom:'20px' }}>
-  "Gaming Productivity Tracker"
+  "Gamified Productivity Tracker"
   </Typography>
   <Typography variant="h6" gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontSize: "20px",color:'white' }}>
   "Boost Your Productivity: Master Gaming Session Tracking Like a Pro!"
