@@ -291,8 +291,8 @@ const FlappyBirdGame = () => {
  // Handle keyboard controls
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Skip game controls when modal is open
-      if (showModal) return;
+      // Skip game controls when either modal is open
+      if (showModal || showPersonalModal) return;
   
       // Prevent scrolling with arrow keys and space
       if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'ArrowDown') {
@@ -311,7 +311,7 @@ const FlappyBirdGame = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleJump, handleDropFaster, showModal]);
+  }, [handleJump, handleDropFaster, showModal, showPersonalModal]);
   
   // Cleanup intervals on component unmount
   useEffect(() => {
@@ -842,8 +842,74 @@ const FlappyBirdGame = () => {
           <p style={{ margin: '5px 0' }}><strong>Click:</strong> Jump</p>
         </div>
       </div>
+      {showPersonalModal && (
+  <div style={{
+    position: 'fixed',
+    top: 0, left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000
+  }}>
+    <div style={{
+      background: 'white',
+      padding: '20px',
+      borderRadius: '8px',
+      width: '300px',
+      textAlign: 'center',
+      boxShadow: '0 0 10px rgba(0,0,0,0.25)'
+    }}>
+      <h3>Enter a personal challenge</h3>
+      <input
+        type="text"
+        value={personalInput}
+        onChange={(e) => setPersonalInput(e.target.value)}
+        style={{
+          width: '100%',
+          padding: '8px',
+          marginBottom: '10px',
+          border: '1px solid #ccc',
+          borderRadius: '4px'
+        }}
+      />
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <button onClick={() => {
+        if (personalInput.trim()) {
+          addPersonalChallenge(personalInput);
+          }
+          setPersonalInput('');
+          setShowPersonalModal(false);
+          }}
+          style={{
+          padding: '8px 16px',
+          backgroundColor: '#3AC14A',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          fontWeight: 'bold'
+        }}>OK</button>
+        <button onClick={() => {
+          setPersonalInput('');
+          setShowPersonalModal(false);
+        }} style={{
+          padding: '8px 16px',
+          backgroundColor: '#ccc',
+          color: '#333',
+          border: 'none',
+          borderRadius: '4px'
+        }}>Cancel</button>
+      </div>
+    </div>
+  </div>
+)}
+
       
     </div>
+
+    
   );
 };
 
