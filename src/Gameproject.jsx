@@ -152,8 +152,7 @@ const FlappyBirdGame = () => {
   };
   
   const updateGameState = () => {
-    // Skip update if game is over
-    if (gameOver) return;
+    
     
     // Update bird position and apply gravity
     const newPosition = birdPositionRef.current + birdVelocityRef.current;
