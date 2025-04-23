@@ -259,6 +259,16 @@ const FlappyBirdGame = () => {
       setDownKeyCount(prev => prev + 1);
     }
   }, [gameStarted, gameOver]);
+
+  const toggleTaskCompletion = (taskId) => {
+  setTasks(prevTasks =>
+    prevTasks.map(task =>
+      task.id === taskId
+        ? { ...task, completed: !task.completed }
+        : task
+    )
+  );
+};
   
   // Function to add a custom task
   const addCustomTask = (taskText) => {
@@ -595,23 +605,28 @@ const FlappyBirdGame = () => {
               border: '1px solid #ddd',
               transition: 'all 0.3s ease'
             }}>
-              <div style={{
-                width: '20px',
-                height: '20px',
-                borderRadius: '50%',
-                border: '2px solid #3AC14A',
-                backgroundColor: task.completed ? '#3AC14A' : 'transparent',
-                marginRight: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 'bold',
-                fontSize: '12px',
-                transition: 'background-color 0.3s ease'
-              }}>
-                {task.completed && '✓'}
-              </div>
+              <div
+                onClick={() => toggleTaskCompletion(task.id)}
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  border: '2px solid #3AC14A',
+                  backgroundColor: task.completed ? '#3AC14A' : 'transparent',
+                  marginRight: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  transition: 'background-color 0.3s ease'
+                  }}  
+                >
+                  {task.completed ? '✓' : ''}
+                </div>
               <span style={{
                 textDecoration: task.completed ? 'line-through' : 'none',
                 color: task.completed ? '#666' : 'black'
