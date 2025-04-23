@@ -25,6 +25,11 @@ const FlappyBirdGame = () => {
   const [gameTime, setGameTime] = useState(0);
   const [downKeyCount, setDownKeyCount] = useState(0); // Track down key presses
   const [hasHitPipe, setHasHitPipe] = useState(false); // Track if bird has hit a pipe
+  const [personalChallenges, setPersonalChallenges] = useState([]);
+  
+  const [personalInput, setPersonalInput] = useState('');
+  const [showPersonalModal, setShowPersonalModal] = useState(false);
+
   
   // Tasks that update automatically based on game events
   const [tasks, setTasks] = useState([
@@ -85,6 +90,10 @@ const FlappyBirdGame = () => {
               return task;
           }
         })
+      );
+    }
+  }, [gameTime, score, downKeyCount, gameStarted]);
+  
   
   // Reset tasks when game restarts
   const resetTasks = () => {
@@ -115,9 +124,9 @@ const FlappyBirdGame = () => {
     setScore(0);
     setGameTime(0);
     setDownKeyCount(0);
-    
-    // Reset tasks for new game
+
     resetTasks();
+    
     
     // Use a flag to track if game is running
     gameRunningRef.current = true;
@@ -312,6 +321,21 @@ const FlappyBirdGame = () => {
       gameRunningRef.current = false;
     };
   }, []);
+
+
+  const addPersonalChallenge = (text) => {
+    if (text.trim()) {
+      setPersonalChallenges(prev => [
+        ...prev,
+        {
+          id: Date.now(),
+          text: text.trim(),
+          completed: false
+        }
+      ]);
+    }
+  };
+  
   
   return (
     <div style={{ 
@@ -693,7 +717,85 @@ const FlappyBirdGame = () => {
     </div>
   </div>
 )}
+{/* Personal Challenges Panel */}
+<div style={{
+  marginTop: '20px',
+  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  borderRadius: '8px',
+  padding: '15px',
+  boxShadow: '0 5px 15px rgba(0,0,0,0.3)'
+}}>
+  <h3 style={{
+    color: '#3AC14A',
+    borderBottom: '2px solid #3AC14A',
+    paddingBottom: '6px',
+    marginTop: 0
+  }}>Personal Challenges:</h3>
 
+  <div>
+    {personalChallenges.map(ch => (
+      <div key={ch.id} style={{
+        display: 'flex',
+        alignItems: 'center',
+        margin: '10px 0',
+        padding: '8px',
+        backgroundColor: ch.completed ? '#e6ffe6' : 'white',
+        borderRadius: '4px',
+        border: '1px solid #ddd'
+      }}>
+        <div
+          onClick={() =>
+            setPersonalChallenges(prev =>
+              prev.map(c =>
+                c.id === ch.id ? { ...c, completed: !c.completed } : c
+              )
+            )
+          }
+          style={{
+            width: '20px',
+            height: '20px',
+            borderRadius: '50%',
+            border: '2px solid #3AC14A',
+            backgroundColor: ch.completed ? '#3AC14A' : 'transparent',
+            marginRight: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontWeight: 'bold',
+            fontSize: '12px',
+            cursor: 'pointer'
+          }}
+        >
+          {ch.completed && '✓'}
+        </div>
+        <span style={{
+          textDecoration: ch.completed ? 'line-through' : 'none',
+          color: ch.completed ? '#666' : 'black'
+        }}>
+          {ch.text}
+        </span>
+      </div>
+    ))}
+  </div>
+
+  <button
+    onClick={() => setShowPersonalModal(true)}
+    style={{
+      width: '100%',
+      padding: '10px',
+      marginTop: '10px',
+      backgroundColor: '#3AC14A',
+      color: 'white',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      fontWeight: 'bold'
+    }}
+  >
+    Add Personal Challenge
+  </button>
+</div>
         
         {/* Add Task Button */}
         <button
@@ -740,6 +842,7 @@ const FlappyBirdGame = () => {
           <p style={{ margin: '5px 0' }}><strong>Click:</strong> Jump</p>
         </div>
       </div>
+      
     </div>
   );
 };
