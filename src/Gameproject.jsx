@@ -28,9 +28,9 @@ const FlappyBirdGame = () => {
   
   // Tasks that update automatically based on game events
   const [tasks, setTasks] = useState([
-    { id: 1, text: 'Read a Book', completed: false },
-    { id: 2, text: 'Went For Run', completed: false },
-    { id: 3, text: 'Reduced Screen time by 1 Hour', completed: false },
+    { id: 1, text: 'Get Through 10 Pipes', completed: false },
+    { id: 2, text: 'Survive 30 Seconds', completed: false },
+    { id: 3, text: 'Down Key 5 times', completed: false },
   ]);
   
   const gameLoopRef = useRef(null);
@@ -72,26 +72,19 @@ const FlappyBirdGame = () => {
   // Check for task completion - runs on every relevant state change
   useEffect(() => {
     if (gameStarted) {
-      // Update tasks based on game state
       setTasks(prevTasks => 
         prevTasks.map(task => {
           switch (task.id) {
-            case 1: // Avoid hitting pipes task
-              // Will be marked as complete when the game ends without hitting a pipe
-              return { ...task, completed: gameOver && !hasHitPipe };
-            case 2: // Play for 1 minute task
-              return { ...task, completed: gameTime >= 60 };
-            case 3: // Score 10 points task
+            case 1: // Get Through 10 Pipes
               return { ...task, completed: score >= 10 };
-            case 4: // Use down arrow 5 times
+            case 2: // Survive 30 Seconds
+              return { ...task, completed: gameTime >= 30 };
+            case 3: // Down Key 5 times
               return { ...task, completed: downKeyCount >= 5 };
             default:
               return task;
           }
         })
-      );
-    }
-  }, [gameTime, score, downKeyCount, gameOver, hasHitPipe, gameStarted]);
   
   // Reset tasks when game restarts
   const resetTasks = () => {
