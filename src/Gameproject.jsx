@@ -286,28 +286,30 @@ const FlappyBirdGame = () => {
   };
   
   // Handle keyboard controls
+ // Handle keyboard controls
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Skip game controls when modal is open
+      if (showModal) return;
+  
       // Prevent scrolling with arrow keys and space
       if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'ArrowDown') {
         e.preventDefault();
       }
-      
+  
       if (e.code === 'Space' || e.code === 'ArrowUp') {
         handleJump();
       } else if (e.code === 'ArrowDown') {
         handleDropFaster();
       }
     };
-    
-    // Add global event listener
+  
     window.addEventListener('keydown', handleKeyDown);
-    
-    // Clean up
+  
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleJump, handleDropFaster]);
+  }, [handleJump, handleDropFaster, showModal]);
   
   // Cleanup intervals on component unmount
   useEffect(() => {
